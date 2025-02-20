@@ -2,7 +2,7 @@
 
 #Validate IP address format
 
-ip="192.168.1.2002"
+ip="192.168.1.200"
 
 if [[ $ip =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]];
 #regular expression to check valid string. {1,3} means 1 to 3 digit from {0 to 9} numbers ex. 192 or 1 or 20
@@ -11,7 +11,7 @@ then
     # Split the IP address and check each octet
 
     IFS='.' read -r -a octets <<< "$ip"
- # IFS is the Internal Field Seperator used to seprate the sring by the "."
+ # IFS is the Internal Field Seperator used to seprate the string by the "."
  # value in the IP is passed to "octets" array 
 
     valid=true

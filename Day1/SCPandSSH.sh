@@ -6,9 +6,9 @@
 #For scp ask user for direction of copy
 #   remote to local
 #   local to remote.
-#copy file to destination home directory with same source file name.
 #Ask for source/destination file location. If no destination location is provided
-#If user gives destination along with filename, keep that as destination filename.
+#copy file to destination home directory with same source file name.
+#If user gives destination along with filename, keep that as destination path and filename.
 #If user provides only destination location (no file name), keep as source file name
 #Note: User knows the password of the remote client (user).
 
@@ -18,7 +18,7 @@
 read -p "Enter 1 for  SCP and 2 for SSH : " input
 
 
-if [ "$input" == "1" ]
+if [ "$input" == "1" ];
 then
     echo "You selected SCP (Secure Copy Protocol)"
     read -p "please Enter the IP Address: " ip
@@ -28,7 +28,10 @@ then
 
     # check the validity of IP address
     if [[ $ip =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]];
-    
+
+    #regular expression to check valid string. {1,3} means 1 to 3 digit from {0 to 9} numbers ex. 192 or 1 or 20
+    # these 3 digit numbers are seprated by a "." \ is the escape chracter
+
     then
         IFS='.' read -r -a octets <<< "$ip"
         
@@ -52,29 +55,36 @@ then
 
 #check the validity of the User Name
     uvalidity=false
-    if [ -z "$uname" ];
+    if [ -z "$uname" ]; #if user name is empty
     then
         echo "User Name cannot be Empty"
     else
         echo "User Name is not empty"
         uvalidity=true 
     fi
+
+#----------------------------------------------------------------------------------
+
 #copying the file by SCP - remote to local
-    if [[ "$direction" == "1" ]];
-    read -p "Enter the source file to copy : " filename
-    read -p "enter the (local) path that the file should be copied : " lpath
+    if [ "$direction" == "1" ];
     then
+
+        echo "you must enter the full remote path of the filename to be copied to your local machine"
+        read -p "Enter the source file remote to copy with the full remote path: " filename
+        read -p "enter the (local) path that the file should be copied : " lpath
+
         #if the local path is not given, copy to the home directory
-        if [[ -z "$lpath" ]];
+        if [ -z "$lpath" ];
         then
-            lpath="$HOME/$(basename "$filename")"
-        # if the destination path is given, copy to it   
-        elif [[ -d "$lpath" ]];
+            lpath="$HOME/$(basename "$filename")" #extract the filename from the path and set to the lpath variable
+        # if the destination path is given, copy to it  
+
+        elif [ -d "$lpath" ]; #checks whether the local path is set to a directory
         then
-            lpath="$lpath/$(basename "$filename")"
+            lpath="$lpath/$(basename "$filename")" # extract th efilename and append to the directory path
         fi
         
-        scp "$uname@$ip:$filename" "$lpath"
+        scp "$uname@$ip:$filename" "$lpath" #assume that the correct user name and the ip is known in advance
         echo "File $filename copied to $lpath"
 
     # copying from local to remote using SCP
@@ -85,7 +95,8 @@ then
         # If no destination is provided, use home directory
         if [ -z "$remote_path" ]; then
             remote_path="~"
-        elif ssh "$uname@$ip" "[ -d $remote_path ]"; then
+        elif [ -d $remote_path ]; then
+            ssh -i ~/.ssh/linuxtest.pem "$username@$ip"
             remote_path="$remote_path/$(basename "$local_file")"
         fi
 
@@ -96,10 +107,6 @@ then
     fi
 
 
-
-
-
-
 #----------------------------------------------------
 # Selection for SSH connection
 elif [ "$input" == "2" ]; then
@@ -107,7 +114,7 @@ elif [ "$input" == "2" ]; then
     read -p "Enter username: " username
     read -p "Enter IP address: " ip
 
-    ssh "$username@$ip"
+    ssh -i ~/.ssh/linuxtest.pem "$username@$ip" 
 else
     echo "Invalid input. Please enter 1 for SCP or 2 for SSH."
 fi
