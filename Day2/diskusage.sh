@@ -10,7 +10,7 @@ do
     usage=$(echo $output | awk '{print $1}' | sed 's/%//')
     if [ $usage -ge $THRESHOLD ];then
         partition=$(echo $output | awk '{print $2}')
-        echo "warning disk on $partition has exceeded the limit of $THRESHOLD% " | mail -s " Threshold exceeded" prabhath@biofoodslk.com
+        echo "warning disk on $partition has exceeded the limit of $THRESHOLD% " | mail -s " Threshold exceeded" aaaa@bio.com
     fi
 done
 
